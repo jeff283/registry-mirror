@@ -1,0 +1,12 @@
+{
+  "runtimes": {
+    "nvidia": {
+      "args": [],
+      "path": "nvidia-container-runtime"
+    }
+  },
+  "max-concurrent-downloads": 20,
+  "max-concurrent-uploads": 20,
+  "max-download-attempts": 5,
+  "registry-mirrors": ["http://localhost:55678"]
+}
