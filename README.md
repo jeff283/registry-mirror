@@ -31,8 +31,8 @@ When you pull an image, Docker checks the local mirror first. On a **miss** (fir
 **1. Clone the repo**
 
 ```bash
-git clone <repo-url>
-cd <repo-dir>
+git clone https://github.com/jeff283/registry-mirror
+cd registry-mirror
 ```
 
 **2. Run the setup script**
@@ -75,7 +75,7 @@ Pull the same image again and check `registry_proxy_hits_total` to confirm cachi
 
 The mirror exposes Prometheus metrics at `http://localhost:55679/metrics`. Useful ones:
 
-```
+```sh
 registry_proxy_hits_total        # cache hits by type (blob/manifest)
 registry_proxy_misses_total      # cache misses by type
 registry_proxy_pulled_bytes_total  # bytes fetched from Docker Hub
