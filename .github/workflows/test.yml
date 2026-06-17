@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Docker registry mirror
+        run: |
+          sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+          {
+            "registry-mirrors": ["http://localhost:55678"]
+          }
+          EOF
+          sudo systemctl restart docker
+          sleep 3
+
+      - name: Start registry mirror
+        run: |
+          docker run -d \
+            --name registry-mirror \
+            --restart always \
+            -p 55678:5000 \
+            -p 55679:5001 \
+            -v registry-mirror-data:/var/lib/registry \
+            -v "$GITHUB_WORKSPACE/registry-config.yml":/etc/distribution/config.yml \
+            registry:3
+
+      - name: Wait for registry
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:55678/v2/ > /dev/null && \
+            curl -sf http://localhost:55679/metrics > /dev/null && exit 0
+            sleep 1
+          done
+          echo "Registry mirror did not become ready in time"
+          docker logs registry-mirror
+          exit 1
+
+      - name: Run tests
+        run: bash test.sh
