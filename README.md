@@ -55,11 +55,16 @@ This will:
 # Registry alive
 curl http://localhost:55678/v2/
 
-# Pull something to seed the cache
+# First pull — should be a miss (fetched from Docker Hub)
 docker pull alpine:latest
-
-# Check proxy metrics — misses should be > 0
 curl -s http://localhost:55679/metrics | grep registry_proxy_misses
+# misses should be > 0
+
+# Remove local image and pull again — should be a hit (served from mirror)
+docker rmi alpine:latest
+docker pull alpine:latest
+curl -s http://localhost:55679/metrics | grep registry_proxy_hits
+# hits should now be > 0
 ```
 
 Pull the same image again and check `registry_proxy_hits_total` to confirm caching is working.
