@@ -1,0 +1,22 @@
+# Pull-through cache for Docker Hub, so repeated image pulls (CI, dev
+# rebuilds, etc.) hit a local cache instead of re-downloading from
+# registry-1.docker.io every time. See README.md for full context and
+# the daemon.json step required to point the Docker client at this mirror.
+name: registry-mirror
+
+services:
+  registry-mirror:
+    image: registry:3
+    container_name: registry-mirror
+    restart: always
+    ports:
+      - "55678:5000" # registry API
+      - "55679:5001" # debug/metrics (prometheus)
+    volumes:
+      # Cached blobs/manifests. Just a cache - safe to wipe any time
+      # with `docker compose down -v`; it repopulates on next pull.
+      - registry-mirror-data:/var/lib/registry
+      - ./registry-config.yml:/etc/distribution/config.yml
+
+volumes:
+  registry-mirror-data:
